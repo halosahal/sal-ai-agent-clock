@@ -1,0 +1,25 @@
+name: SAL LinkedIn Hourly Scout
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Wake SAL LinkedIn Scout
+        env:
+          SAL_LINKEDIN_SCOUT_SECRET: ${{ secrets.SAL_LINKEDIN_SCOUT_SECRET }}
+        run: |
+          test -n "$SAL_LINKEDIN_SCOUT_SECRET"
+          curl --fail-with-body --silent --show-error \
+            --retry 2 --retry-all-errors --max-time 120 \
+            -X POST 'https://sal-ai-agent.vercel.app/api/linkedin/scout/tick' \
+            -H "Authorization: Bearer $SAL_LINKEDIN_SCOUT_SECRET" \
+            -H 'Content-Type: application/json'
